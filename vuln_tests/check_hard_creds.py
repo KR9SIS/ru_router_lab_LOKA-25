@@ -32,28 +32,15 @@ def check_for_cred(ip: str):
                 elif res.status_code == 200 and "dashboard" in res.text.lower():
                     print(f"Weak credential found!: {user}:{password}")
             else:
-                print(f"Error occured, return status: {res.status_code}")
+                print(
+                    f"Check for Hardcoded Credentials\nError occured, return status: {res.status_code}"
+                )
         except TimeoutError as e:
-            print(f"Connection error: {e}")
-
-
-def check_command_injection(ip: str):
-    """
-    Checks for the command injection vulnerability
-    """
-
-    print("Checking for command injection...")
-
-    payload = "test; cat /etc/passwd"
-
-    res = post(f"http://{ip}/config", data={"input": payload}, timeout=10)
-    if "root:x" in res.text:
-        print("Command injection vulnerability found!")
+            print(f"Check for Hardcoded Credentials\nConnection error: {e}")
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument("ip")
-    check_for_cred()
-    check_command_injection()
-
+    parser = ArgumentParser(prog="check_for_cred")
+    parser.add_argument("ip", action="store", type=str)
+    args = parser.parse_args("ip")
+    check_for_cred(args.ip)
