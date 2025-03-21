@@ -24,7 +24,7 @@ def check_for_cred(ip: str):
                 timeout=10,
             )
             if res:
-                # Somtimes routers display Welcome, Admin. Reason behind welcome
+                # Somtimes routers display "Welcome, Admin". Reason behind welcome
                 if "welcome" in res.text.lower():
                     print(f"Weak credential found!: {user}:{password}")
 
