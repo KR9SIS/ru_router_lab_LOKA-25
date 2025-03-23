@@ -14,33 +14,45 @@ def check_for_cred(ip: str):
     print("# Checking for common hardcoded credentials...")
 
     # TP-Link uses admin as user and admin as passwd
-    common_creds = [("admin", "admin"), ("root", "root"), ("admin", "12345")]
-
-    for user, password in common_creds:
-        try:
-            res = post(
-                f"http://{ip}/login",
-                data={"username": user, "password": password},
-                timeout=5,
-            )
-            if res:
-                # Somtimes routers display "Welcome, Admin". Reason behind welcome
-                if "welcome" in res.text.lower():
-                    print(f"- *Weak credential found!: {user}:{password}*")
-
-                # Checks for status code 200
-                elif res.status_code == 200 and "dashboard" in res.text.lower():
-                    print(f"- *Weak credential found!: {user}:{password}*")
-            else:
-                print(
-                    f"- Check for Hardcoded Credentials: {user}:{password}\nError occured, return status: {res.status_code}"
+    usernames = ["admin", "root"]
+    passwords = [
+        "admin",
+        "root",
+        "password",
+        "passwd",
+        "qwerty",
+        "123123",
+        "1234567",
+        "12345678",
+        "1234567890",
+        "0123456789",
+    ]
+    for user in usernames:
+        for password in passwords:
+            try:
+                res = post(
+                    f"http://{ip}/login",
+                    data={"username": user, "password": password},
+                    timeout=5,
                 )
-        except RequestException as e:
-            print(
-                f"- Check for Hardcoded Credentials: {user}:{password}\nRequest raised exception: {e}"
-            )
+                if res:
+                    # Somtimes routers display "Welcome, Admin". Reason behind welcome
+                    if "welcome" in res.text.lower():
+                        print(f"- *Weak credential found!: {user}:{password}*")
 
-        print()
+                    # Checks for status code 200
+                    elif res.status_code == 200 and "dashboard" in res.text.lower():
+                        print(f"- *Weak credential found!: {user}:{password}*")
+                else:
+                    print(
+                        f"- Check for Hardcoded Credentials: {user}:{password}\nError occured, return status: {res.status_code}"
+                    )
+            except RequestException as e:
+                print(
+                    f"- Check for Hardcoded Credentials: {user}:{password}\nRequest raised exception: {e}"
+                )
+
+            print()
 
 
 if __name__ == "__main__":
