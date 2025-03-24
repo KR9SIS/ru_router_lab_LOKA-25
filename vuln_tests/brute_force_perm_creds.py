@@ -9,16 +9,15 @@ from string import printable
 from requests import RequestException, post
 
 
-def check_for_cred(ip: str):
+def check_for_cred(ip: str, min_len: int, max_len: int):
     """
-    #Tries to brute force credentials
+    Tries to brute force credentials using permutations of the following string:
+    0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&'()*+,-./:;<=>?@[\\]^_`{|
     """
     print("# Brute forcing for credentials...")
 
     no_hits = True
-    MIN_LEN = 6
-    MAX_LEN = 10
-    for i in range(MIN_LEN, MAX_LEN + 1):
+    for i in range(min_len, max_len + 1):
         for user_perm in permutations(printable, i):
             for pass_perm in permutations(printable, i):
                 user_perm = "".join(user_perm)
@@ -53,5 +52,7 @@ def check_for_cred(ip: str):
 if __name__ == "__main__":
     parser = ArgumentParser(prog="brute_force_creds")
     parser.add_argument("-ip", action="store", type=str)
+    parser.add_argument("-min", action="store", type=int, default=6, required=False)
+    parser.add_argument("-max", action="store", type=int, default=15, required=False)
     args = parser.parse_args()
-    check_for_cred(args.ip)
+    check_for_cred(args.ip, args.min, args.max)
