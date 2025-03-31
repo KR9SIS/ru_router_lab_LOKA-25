@@ -2,43 +2,47 @@
 Script to emulate the TP-Link EX820v router
 """
 
-import os
 import socket
-import sys
-import threading
+from pathlib import Path
+from threading import Thread
 
-sys.path.append("..")
 from qiling import Qiling
 from qiling.const import QL_VERBOSE
 
+run = True
+
 
 def patcher(ql):
-    """"""
+    """
+    Docstring
+    """
     br0_addr = ql.mem.search("br0".encode() + b"\x00")
     for addr in br0_addr:
         ql.mem.write(addr, b"lo\x00")
 
 
 def nvram_listener():
-    """"""
-    server_address = "rootfs/var/cfm_socket"
+    """
+    Docstring
+    """
+    server_address: Path = Path("rootfs/var/cfm_socket")
     data = ""
 
     try:
-        os.unlink(server_address)
+        server_address.unlink()
     except OSError:
-        if os.path.exists(server_address):
+        if server_address.exists():
             raise
 
     # Create UDS socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.bind(server_address)
+    sock.bind(str(server_address))
     sock.listen(1)
 
-    while True:
+    while run:
         connection, _ = sock.accept()
         try:
-            while True:
+            while run:
                 data += str(connection.recv(1024))
 
                 if "lan.webiplansslen" in data:
@@ -63,7 +67,9 @@ def nvram_listener():
 
 
 def my_sandbox(path, rootfs):
-    """ """
+    """
+    Docstring
+    """
     ql: Qiling = Qiling(path, rootfs, verbose=QL_VERBOSE.DEBUG)
     ql.add_fs_mapper("/dev/urandom", "/dev/urandom")
     ql.hook_address(patcher, ql.loader.elf_entry)
@@ -71,6 +77,8 @@ def my_sandbox(path, rootfs):
 
 
 if __name__ == "__main__":
-    nvram_listener_therad = threading.Thread(target=nvram_listener, daemon=True)
-    nvram_listener_therad.start()
+    nvram_listener_thread = Thread(target=nvram_listener, daemon=True)
+    nvram_listener_thread.start()
     my_sandbox(["rootfs/bin/httpd"], "rootfs")
+    run = False
+    nvram_listener_thread.join()
