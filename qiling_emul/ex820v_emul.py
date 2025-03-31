@@ -2,14 +2,14 @@
 Script to emulate the TP-Link EX820v router
 """
 
-import socket
 from pathlib import Path
+from socket import AF_UNIX, SOCK_STREAM, socket
 from threading import Thread
 
 from qiling import Qiling
 from qiling.const import QL_VERBOSE
 
-run = True
+running = True
 
 
 def patcher(ql):
@@ -25,7 +25,7 @@ def nvram_listener():
     """
     Docstring
     """
-    server_address: Path = Path("rootfs/var/cfm_socket")
+    server_address: Path = Path("squashfs-root/var/cfm_socket")
     data = ""
 
     try:
@@ -35,14 +35,14 @@ def nvram_listener():
             raise
 
     # Create UDS socket
-    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock = socket(AF_UNIX, SOCK_STREAM)
     sock.bind(str(server_address))
     sock.listen(1)
 
-    while run:
+    while running:
         connection, _ = sock.accept()
         try:
-            while run:
+            while running:
                 data += str(connection.recv(1024))
 
                 if "lan.webiplansslen" in data:
@@ -79,6 +79,6 @@ def my_sandbox(path, rootfs):
 if __name__ == "__main__":
     nvram_listener_thread = Thread(target=nvram_listener, daemon=True)
     nvram_listener_thread.start()
-    my_sandbox(["rootfs/bin/httpd"], "rootfs")
-    run = False
+    my_sandbox(["squashfs-root/bin/httpd"], "squashfs-root")
+    running = False
     nvram_listener_thread.join()
