@@ -1,2 +1,4 @@
-.venv*
-*/rockyou.txt
+**.venv**
+**/rockyou.txt
+**/.vscode
+qiling_emul/squashfs-root/**
