@@ -47,7 +47,9 @@ def nvram_listener():
                 data += str(connection.recv(1024).decode("utf-8", errors="ignore"))
 
                 if "lan.webiplansslen" in data:
-                    connection.send("192.168.170.169".encode())
+                    connection.send(
+                        "192.168.170.169".encode()
+                    )  # TODO Figure out what IP to replace this with
                 elif "wan_ifname" in data:
                     connection.send("eth0".encode())
                 elif "wan_ifnames" in data:
@@ -71,7 +73,7 @@ def my_sandbox(path, rootfs):
     """
     Docstring
     """
-    ql: Qiling = Qiling(path, rootfs, verbose=QL_VERBOSE.DISASM)
+    ql: Qiling = Qiling(path, rootfs, verbose=QL_VERBOSE.DEBUG)
     ql.hook_address(patcher, ql.loader.elf_entry)
     ql.run()
 
