@@ -4,12 +4,13 @@ Script to emulate the TP-Link EX820v router
 
 from pathlib import Path
 from socket import AF_UNIX, SOCK_STREAM, socket
-from threading import Thread
+from threading import Thread, Event
 
 from qiling import Qiling
 from qiling.const import QL_VERBOSE
 
-running = True
+running_event = Event()
+running_event.set()
 
 
 def patcher(ql):
@@ -39,11 +40,11 @@ def nvram_listener():
     sock.bind(str(server_address))
     sock.listen(1)
 
-    while running:
+    while running_event.is_set():
         connection, _ = sock.accept()
         try:
-            while running:
-                data += str(connection.recv(1024))
+            while running_event.is_set():
+                data += str(connection.recv(1024).decode("utf-8", errors="ignore"))
 
                 if "lan.webiplansslen" in data:
                     connection.send("192.168.170.169".encode())
@@ -70,8 +71,7 @@ def my_sandbox(path, rootfs):
     """
     Docstring
     """
-    ql: Qiling = Qiling(path, rootfs, verbose=QL_VERBOSE.DEBUG)
-    ql.add_fs_mapper("/dev/urandom", "/dev/urandom")
+    ql: Qiling = Qiling(path, rootfs, verbose=QL_VERBOSE.DISASM)
     ql.hook_address(patcher, ql.loader.elf_entry)
     ql.run()
 
@@ -80,5 +80,5 @@ if __name__ == "__main__":
     nvram_listener_thread = Thread(target=nvram_listener, daemon=True)
     nvram_listener_thread.start()
     my_sandbox(["squashfs-root/bin/httpd"], "squashfs-root")
-    running = False
+    running_event.clear()
     nvram_listener_thread.join()
