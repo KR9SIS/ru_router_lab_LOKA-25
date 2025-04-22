@@ -17,7 +17,7 @@ def patcher(ql):
     """
     Docstring
     """
-    br0_addr = ql.mem.search("br0".encode() + b"\x00")
+    br0_addr = ql.mem.search("br0".encode("utf-8") + b"\x00")
     for addr in br0_addr:
         ql.mem.write(addr, b"lo\x00")
 
@@ -48,20 +48,20 @@ def nvram_listener():
 
                 if "lan.webiplansslen" in data:
                     connection.send(
-                        "192.168.170.169".encode()
+                        "192.168.170.169".encode("utf-8")
                     )  # TODO Figure out what IP to replace this with
                 elif "wan_ifname" in data:
-                    connection.send("eth0".encode())
+                    connection.send("eth0".encode("utf-8"))
                 elif "wan_ifnames" in data:
-                    connection.send("eth0".encode())
+                    connection.send("eth0".encode("utf-8"))
                 elif "wan0_ifname" in data:
-                    connection.send("eth0".encode())
+                    connection.send("eth0".encode("utf-8"))
                 elif "wan0_ifnames" in data:
-                    connection.send("eth0".encode())
+                    connection.send("eth0".encode("utf-8"))
                 elif "sys.workmode" in data:
-                    connection.send("bridge".encode())
+                    connection.send("bridge".encode("utf-8"))
                 elif "wan1.ip" in data:
-                    connection.send("1.1.1.1".encode())
+                    connection.send("1.1.1.1".encode("utf-8"))
                 else:
                     break
                 data = ""
