@@ -2,5 +2,6 @@
 **/rockyou.txt
 **/.vscode
 qiling_emul/squashfs-root/**
+qiling_emul/qiling/**
+qiling_emul/**.bin
 Notes
-**.bin
